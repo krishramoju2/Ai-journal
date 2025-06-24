@@ -1,60 +1,48 @@
-import React, { useState } from "react";
+// src/JournalForm.js
+import { useState } from 'react';
 
 function JournalForm() {
-  const [text, setText] = useState("");
-
-  const summarize = async (input) => {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-3.5-turbo",
-        messages: [
-          {
-            role: "user",
-            content: `Summarize this and detect mood:\n${input}`,
-          },
-        ],
-        max_tokens: 60,
-      }),
-    });
-
-    const data = await response.json();
-    return data.choices[0].message.content;
-  };
+  const [entry, setEntry] = useState('');
+  const [response, setResponse] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const summary = await summarize(text);
+    setLoading(true);
+    setResponse('');
 
-    const newEntry = {
-      id: Date.now(),
-      text,
-      summary,
-      timestamp: new Date().toLocaleString(),
-    };
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: entry })
+    });
 
-    const entries = JSON.parse(localStorage.getItem("entries") || "[]");
-    entries.push(newEntry);
-    localStorage.setItem("entries", JSON.stringify(entries));
-    setText("");
-    window.location.reload();
+    const data = await res.json();
+    if (data.choices) {
+      setResponse(data.choices[0].message.content);
+    } else {
+      setResponse('Error: ' + JSON.stringify(data));
+    }
+    setLoading(false);
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <textarea
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        placeholder="Write your journal entry..."
-        rows="5"
-        required
-      />
-      <button type="submit">Submit</button>
-    </form>
+    <div>
+      <h2>Journal Entry</h2>
+      <form onSubmit={handleSubmit}>
+        <textarea
+          value={entry}
+          onChange={(e) => setEntry(e.target.value)}
+          rows="4"
+          cols="50"
+        />
+        <br />
+        <button type="submit" disabled={loading}>
+          {loading ? 'Thinking...' : 'Submit'}
+        </button>
+      </form>
+      {response && <p><strong>AI:</strong> {response}</p>}
+    </div>
   );
 }
 
