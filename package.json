@@ -1,15 +1,8 @@
-{
-  "name": "ai-journal-vercel",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "dev": "react-scripts start",
-    "build": "react-scripts build",
-    "start": "react-scripts start"
-  },
-  "dependencies": {
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0",
-    "react-scripts": "5.0.1"
-  }
+"scripts": {
+  "start": "node server.js"
+},
+"dependencies": {
+  "express": "^4.18.2",
+  "dotenv": "^16.0.3",
+  "node-fetch": "^2.6.7"
 }
